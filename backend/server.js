@@ -28,7 +28,13 @@ app.use(express.urlencoded({ extended: true }));
 
 // Security middleware
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+    origin: [
+        'http://localhost:3000',
+        'https://mohdrayan01.github.io'
+    ],
+    credentials: true
+}));
 
 // Rate limiting
 const limiter = rateLimit({
