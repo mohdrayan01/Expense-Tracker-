@@ -62,7 +62,7 @@ const AppLayout = ({ children }) => {
 
 function App() {
     return (
-        <BrowserRouter>
+        <BrowserRouter basename="/Expense-Tracker-">
             <ThemeProvider>
                 <AuthProvider>
                     <Toaster
