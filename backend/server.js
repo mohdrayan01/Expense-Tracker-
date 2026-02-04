@@ -61,6 +61,8 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`📡 MongoDB URI provided: ${process.env.MONGO_URI || process.env.MONGODB_URI ? 'YES' : 'NO'}`);
+    console.log(`🔐 JWT Secret provided: ${process.env.JWT_SECRET ? 'YES' : 'NO'}`);
 });
