@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>CandyDash - Your Playful Financial Stash</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&family=Outfit:wght@400;700;900&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2547f4',
+                        candy: {
+                            pink: '#ff85a1',
+                            blue: '#70d6ff',
+                            purple: '#be95ff',
+                            mint: '#2af598',
+                            orange: '#ffaa33',
+                            pastel: '#fff5f8',
+                        }
+                    },
+                    borderRadius: {
+                        'lg': '0.5rem',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer components {
+            .candy-grid {
+                background-image: 
+                    linear-gradient(rgba(255, 133, 161, 0.08) 1.5px, transparent 1.5px),
+                    linear-gradient(90deg, rgba(255, 133, 161, 0.08) 1.5px, transparent 1.5px);
+                background-size: 50px 50px;
+            }
+            .glass-candy {
+                background: rgba(255, 255, 255, 0.7);
+                backdrop-filter: blur(12px);
+                border: 2px solid rgba(255, 255, 255, 0.9);
+                box-shadow: 0 12px 40px rgba(255, 133, 161, 0.08);
+            }
+            .balance-card {
+                background: rgba(255, 255, 255, 0.85);
+                border-radius: 3rem;
+                position: relative;
+                box-shadow: 
+                    inset 0 0 40px rgba(255, 133, 161, 0.15),
+                    inset 0 0 80px rgba(112, 214, 255, 0.1),
+                    0 25px 50px -12px rgba(255, 133, 161, 0.2);
+                border: 4px solid white;
+            }
+            .liquid-wave-container {
+                position: relative;
+                background: #f0f0f0;
+                overflow: hidden;
+                border-radius: 9999px;
+                box-shadow: inset 0 2px 8px rgba(0,0,0,0.05);
+            }
+            .liquid-wave {
+                background: linear-gradient(90deg, #ff85a1, #be95ff, #70d6ff);
+                height: 100%;
+                position: relative;
+                overflow: hidden;
+                border-radius: 9999px;
+            }
+            .liquid-wave::after {
+                content: "";
+                position: absolute;
+                top: -150%;
+                left: -50%;
+                width: 300%;
+                height: 300%;
+                background: rgba(255,255,255,0.3);
+                border-radius: 42%;
+                animation: wave-rotate 8s linear infinite;
+            }
+            @keyframes wave-rotate {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+            .floating-3d {
+                filter: drop-shadow(0 15px 10px rgba(0,0,0,0.1));
+                animation: float 4s ease-in-out infinite;
+            }
+            @keyframes float {
+                0%, 100% { transform: translateY(0) rotate(0); }
+                50% { transform: translateY(-15px) rotate(5deg); }
+            }
+            .mesh-container {
+                background-image: radial-gradient(at 0% 0%, #FF85A1 0%, transparent 50%),
+                                radial-gradient(at 100% 0%, #70D6FF 0%, transparent 50%),
+                                radial-gradient(at 100% 100%, #BE95FF 0%, transparent 50%),
+                                radial-gradient(at 0% 100%, #FF85A1 0%, transparent 50%);
+                background-attachment: fixed;
+            }
+            .iridescent-border {
+                position: relative;
+                padding: 3px;
+                background: linear-gradient(135deg, #ff85a1, #70d6ff, #be95ff, #2af598);
+                border-radius: 2.5rem;
+                transform: perspective(1000px) rotateX(10deg) rotateY(-15deg) rotateZ(2deg);
+            }
+            .toggle-switch {
+                width: 60px;
+                height: 32px;
+                background: #e2e8f0;
+                border-radius: 16px;
+                position: relative;
+                cursor: pointer;
+                transition: background 0.3s;
+            }
+            .toggle-switch::after {
+                content: '';
+                position: absolute;
+                width: 26px;
+                height: 26px;
+                background: white;
+                border-radius: 50%;
+                top: 3px;
+                left: 3px;
+                transition: transform 0.3s;
+            }
+            .dark-mode-on .toggle-switch {
+                background: #4a4a6a;
+            }
+            .dark-mode-on .toggle-switch::after {
+                transform: translateX(28px);
+            }
+        }
+    </style>
+</head>
+
+<body class="font-['Quicksand'] bg-candy-pastel dark:bg-[#1a1a2e]">
+    <div id="root"></div>
+
+    <!-- React and Dependencies -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/history@5/umd/history.development.js"></script>
+    <script src="https://unpkg.com/react-router@6.3.0/umd/react-router.development.js"></script>
+    <script src="https://unpkg.com/react-router-dom@6.3.0/umd/react-router-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { createRoot } = ReactDOM;
+        const { MemoryRouter, Routes, Route, Link, useNavigate, useLocation } = ReactRouterDOM;
+
+        // --- Common Components ---
+
+        const Navigation = () => {
+            const location = useLocation();
+            const navigate = useNavigate();
+            const isActive = (path) => location.pathname === path;
+
+            return (
+                <nav className="w-24 lg:w-32 glass-candy m-6 rounded-[3.5rem] flex flex-col items-center py-12 gap-12 z-20 shadow-xl dark:bg-white/10 dark:border-white/20">
+                    <Link to="/landing" className="w-16 h-16 bg-gradient-to-br from-candy-pink to-candy-purple rounded-[1.5rem] flex items-center justify-center shadow-[0_10px_15px_rgba(255,133,161,0.4)] text-white hover:scale-110 transition-transform">
+                        <span className="material-symbols-outlined text-4xl">bakery_dining</span>
+                    </Link>
+                    <div className="flex flex-col gap-10 flex-1 justify-center">
+                        <Link to="/" className={`group cursor-pointer relative ${isActive('/') ? 'opacity-100' : 'opacity-40 hover:opacity-100'}`}>
+                            <span className="material-symbols-outlined text-candy-pink text-4xl relative z-10">grid_view</span>
+                        </Link>
+                        <Link to="/history" className={`group cursor-pointer transition-all hover:scale-125 ${isActive('/history') ? 'opacity-100 text-candy-purple' : 'opacity-30 hover:opacity-100'}`}>
+                            <span className="material-symbols-outlined text-4xl">history_edu</span>
+                        </Link>
+                        <Link to="/analytics" className={`group cursor-pointer transition-all hover:scale-125 ${isActive('/analytics') ? 'opacity-100 text-candy-blue' : 'opacity-30 hover:opacity-100'}`}>
+                            <span className="material-symbols-outlined text-4xl">analytics</span>
+                        </Link>
+                        <Link to="/settings" className={`group cursor-pointer transition-all hover:scale-125 ${isActive('/settings') ? 'opacity-100 text-candy-orange' : 'opacity-30 hover:opacity-100'}`}>
+                            <span className="material-symbols-outlined text-4xl">settings</span>
+                        </Link>
+                    </div>
+                    <div className="mt-auto flex flex-col items-center gap-6">
+                        <Link to="/signup" className="w-14 h-14 bg-white rounded-2xl shadow-md flex items-center justify-center text-candy-pink cursor-pointer hover:bg-candy-pink hover:text-white transition-all">
+                            <span className="material-symbols-outlined text-3xl font-bold">logout</span>
+                        </Link>
+                    </div>
+                </nav>
+            );
+        };
+
+        const Layout = ({ children }) => (
+            <div className="relative min-h-screen flex overflow-hidden">
+                <div className="fixed inset-0 candy-grid pointer-events-none opacity-30"></div>
+                <Navigation />
+                <main className="flex-1 overflow-y-auto p-12">
+                    {children}
+                </main>
+            </div>
+        );
+
+        // --- Screens ---
+
+        const HomePage = () => {
+            const navigate = useNavigate();
+            return (
+                <div className="flex-1 flex flex-col">
+                    <header className="flex justify-between items-center mb-12">
+                        <div>
+                            <div className="flex items-center gap-3 mb-2">
+                                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-2xl">👋</div>
+                                <h2 className="text-candy-pink font-bold text-sm uppercase tracking-[0.2em]">Hey there, Sweet Tooth!</h2>
+                            </div>
+                            <h1 className="text-6xl font-[Outfit] font-black text-[#2d2d4a] tracking-tight">Playful Dashboard</h1>
+                        </div>
+                        <div className="flex gap-6 items-center">
+                            <div className="w-16 h-16 rounded-[2rem] bg-white border-2 border-white shadow-lg overflow-hidden flex items-center justify-center cursor-pointer hover:rotate-12 transition-all">
+                                <img alt="Profile" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCF4-zzPw4IPBDyKGvJ-MhwsQ0y2phjb0zhyD79GB0RuBm1LeqgPg62SYXsLg-zENbstnMfJ_NZdoKGuoerhTO7sSGlvX7TTIPIObb2DMH-JF4EauIybe3zKqDeTmw8wBgfbRhTKkYrXueNf_NRMr6Wbxp0X0Nf31c251GF6SCaWmaZNBYcbW2VS99XoI3FEeZzXKf-qXfwWCJ4H9Q3YUqxNwMNXLzO6TcCclVo1PJtxCdSQkykrbZS_SolzEXcEbtyNGv-1HoKb6k6" />
+                            </div>
+                        </div>
+                    </header>
+                    <div className="balance-card p-12 mb-10 overflow-hidden">
+                        <div className="relative z-10 flex justify-between items-center">
+                            <div>
+                                <span className="bg-white/60 px-5 py-2 rounded-full text-xs font-black uppercase tracking-widest text-candy-pink shadow-sm">Your Candy Jar</span>
+                                <h2 className="text-7xl font-[Outfit] font-black text-[#2d2d4a] mt-6 tracking-tight">
+                                    $24,890<span className="text-candy-purple text-5xl">.45</span>
+                                </h2>
+                                <div className="mt-8 flex items-center gap-4">
+                                    <div className="px-5 py-2 bg-candy-mint/20 text-[#15803d] font-bold rounded-full text-sm flex items-center gap-2 border border-candy-mint/30">
+                                        <span className="material-symbols-outlined text-lg">trending_up</span>
+                                        +18.2% Monthly Grow
+                                    </div>
+                                    <button onClick={() => navigate('/analytics')} className="px-8 py-3 bg-white/60 rounded-full font-bold text-sm hover:bg-white transition-all shadow-sm border border-white">View Details</button>
+                                </div>
+                            </div>
+                            <div className="relative w-64 h-64 flex items-center justify-center">
+                                <div className="absolute inset-0 bg-gradient-to-tr from-candy-pink/20 to-candy-blue/20 rounded-full blur-3xl"></div>
+                                <span className="material-symbols-outlined text-[10rem] text-candy-orange drop-shadow-[0_25px_25px_rgba(255,170,51,0.5)] floating-3d select-none">monetization_on</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
+                        <div className="glass-candy rounded-[3rem] p-10 flex flex-col">
+                            <h3 className="text-2xl font-[Outfit] font-black text-[#2d2d4a] mb-8">Recent Treats</h3>
+                            <div className="space-y-6">
+                                <div className="flex items-center gap-5 group cursor-pointer hover:translate-x-1 transition-transform">
+                                    <div className="w-14 h-14 rounded-2xl bg-[#ffecf1] flex items-center justify-center text-candy-pink border-2 border-white shadow-md">
+                                        <span className="material-symbols-outlined">cake</span>
+                                    </div>
+                                    <div className="flex-1 flex justify-between">
+                                        <div>
+                                            <p className="font-bold text-[#2d2d4a]">Pastry Palace</p>
+                                            <p className="text-xs text-gray-400">Croissants</p>
+                                        </div>
+                                        <p className="font-black text-candy-pink">-$18.00</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-5 group cursor-pointer hover:translate-x-1 transition-transform">
+                                    <div className="w-14 h-14 rounded-2xl bg-[#f0f7ff] flex items-center justify-center text-candy-blue border-2 border-white shadow-md">
+                                        <span className="material-symbols-outlined">bubbles</span>
+                                    </div>
+                                    <div className="flex-1 flex justify-between">
+                                        <div>
+                                            <p className="font-bold text-[#2d2d4a]">Boba Bliss</p>
+                                            <p className="text-xs text-gray-400">Taro Milk Tea</p>
+                                        </div>
+                                        <p className="font-black text-candy-pink">-$7.50</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <button onClick={() => navigate('/history')} className="mt-8 text-sm font-bold text-candy-pink hover:underline">View all transactions</button>
+                        </div>
+                        <div className="glass-candy rounded-[3rem] p-10">
+                            <div className="flex justify-between items-center mb-10">
+                                <div>
+                                    <h3 className="text-2xl font-[Outfit] font-black text-[#2d2d4a]">Budget Melt</h3>
+                                    <p className="text-gray-400 font-medium text-sm">Monthly Sweet Allowance</p>
+                                </div>
+                                <span className="text-4xl font-black text-candy-pink">74%</span>
+                            </div>
+                            <div className="h-16 w-full liquid-wave-container border-4 border-white shadow-lg mb-8">
+                                <div className="liquid-wave w-[74%]"></div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-6">
+                                <div className="p-6 bg-white/50 rounded-[2rem] border-2 border-white">
+                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Max Limit</p>
+                                    <p className="text-3xl font-[Outfit] font-black text-[#2d2d4a]">$3,500</p>
+                                </div>
+                                <div className="p-6 bg-white/50 rounded-[2rem] border-2 border-white">
+                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Sweet Left</p>
+                                    <p className="text-3xl font-[Outfit] font-black text-candy-mint">$910</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const TransactionHistory = () => {
+            const [isModalOpen, setIsModalOpen] = useState(false);
+            return (
+                <div className="max-w-5xl mx-auto">
+                    <header className="flex flex-col gap-8 mb-10">
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <h2 className="text-candy-purple font-bold text-sm uppercase tracking-widest mb-1">Your Spending Journey</h2>
+                                <h1 className="text-5xl font-[Outfit] font-black text-[#2d2d4a]">Transaction History</h1>
+                            </div>
+                            <div className="flex items-center gap-6">
+                                <div className="glass-candy flex items-center px-6 py-4 rounded-full min-w-[300px]">
+                                    <span className="material-symbols-outlined text-gray-400 mr-3">search</span>
+                                    <input className="bg-transparent border-none focus:ring-0 text-sm font-medium w-full text-[#4a4a6a]" placeholder="Search treats..." type="text" />
+                                </div>
+                                <button onClick={() => setIsModalOpen(true)} className="w-16 h-16 bg-gradient-to-tr from-candy-pink to-candy-purple text-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
+                                    <span className="material-symbols-outlined text-3xl font-bold">add</span>
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div className="space-y-6">
+                        <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest ml-4 mb-4">Today, August 24</h3>
+                        {[
+                            { title: 'Sugar Rush Donuts', cat: 'Sweet Treats', price: '-$14.20', time: '02:30 PM', icon: 'icecream', color: 'pink' },
+                            { title: 'Music Streaming Plus', cat: 'Entertainment', price: '-$9.99', time: '09:15 AM', icon: 'auto_awesome', color: 'purple' },
+                        ].map((item, idx) => (
+                            <div key={idx} className="glass-candy rounded-3xl p-6 flex items-center gap-6 group hover:bg-white cursor-pointer transition-all">
+                                <div className={`w-16 h-16 rounded-2xl bg-candy-${item.color}/10 flex items-center justify-center border-2 border-white overflow-hidden`}>
+                                    <span className={`material-symbols-outlined text-4xl text-candy-${item.color}`}>{item.icon}</span>
+                                </div>
+                                <div className="flex-1">
+                                    <h4 className="font-bold text-lg text-[#2d2d4a]">{item.title}</h4>
+                                    <p className="text-sm text-gray-400 font-medium">{item.cat}</p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-xl font-black text-[#2d2d4a]">{item.price}</p>
+                                    <p className="text-[10px] font-bold text-gray-400 uppercase">{item.time}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {isModalOpen && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/10 backdrop-blur-md">
+                            <div className="glass-candy w-full max-w-xl rounded-[3.5rem] p-10 relative overflow-hidden shadow-2xl border-4 border-white animate-in zoom-in-95 duration-200">
+                                <div className="flex justify-between items-center mb-8">
+                                    <h2 className="text-3xl font-[Outfit] font-black text-[#2d2d4a]">New Expense</h2>
+                                    <button onClick={() => setIsModalOpen(false)} className="w-10 h-10 rounded-full bg-white/50 flex items-center justify-center hover:bg-white transition-all">
+                                        <span className="material-symbols-outlined text-gray-400">close</span>
+                                    </button>
+                                </div>
+                                <div className="text-center mb-10">
+                                    <div className="inline-flex items-baseline gap-2 relative">
+                                        <span className="text-4xl font-black text-candy-pink">$</span>
+                                        <input className="w-48 bg-transparent border-none text-7xl font-[Outfit] font-black text-[#2d2d4a] focus:ring-0 p-0 text-center" type="text" defaultValue="45.50" />
+                                    </div>
+                                    <p className="text-sm font-bold text-gray-400 mt-4 uppercase tracking-widest">How much did you spend?</p>
+                                </div>
+                                <div className="mb-10">
+                                    <p className="text-sm font-bold text-[#4a4a6a] mb-6 px-2">Pick a category</p>
+                                    <div className="grid grid-cols-4 gap-6">
+                                        {['local_pizza', 'directions_bus', 'featured_seasonal_and_gifts', 'local_cafe'].map(icon => (
+                                            <div key={icon} className="flex flex-col items-center gap-2 group cursor-pointer">
+                                                <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center border-2 border-white shadow-md hover:scale-110 transition-transform">
+                                                    <span className="material-symbols-outlined text-3xl text-candy-pink">{icon}</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                <button onClick={() => setIsModalOpen(false)} className="w-full py-6 rounded-3xl text-white font-[Outfit] font-black text-xl bg-gradient-to-r from-candy-pink to-candy-purple shadow-xl hover:scale-[1.02] transition-all">
+                                    Add Transaction
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const AnalyticsPage = () => (
+            <div className="space-y-12">
+                <header className="flex justify-between items-center">
+                    <div>
+                        <p className="text-candy-purple font-black text-sm uppercase tracking-[0.3em] mb-1">Deep Dive</p>
+                        <h1 className="text-6xl font-[Outfit] font-black text-[#2d2d4a]">Spending Analytics</h1>
+                    </div>
+                    <div className="flex bg-white/60 p-2 rounded-full border-2 border-white shadow-sm">
+                        <button className="px-6 py-2 rounded-full bg-candy-pink text-white font-bold">Week</button>
+                        <button className="px-6 py-2 rounded-full text-gray-400 font-bold">Month</button>
+                    </div>
+                </header>
+                <div className="grid grid-cols-12 gap-10">
+                    <div className="col-span-12 lg:col-span-8 glass-candy p-10 flex flex-col md:flex-row items-center justify-around h-[450px]">
+                        <div className="relative w-80 h-80 flex items-center justify-center">
+                            <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" fill="transparent" r="40" stroke="#ff85a1" strokeDasharray="75 251" strokeWidth="12"></circle>
+                                <circle cx="50" cy="50" fill="transparent" r="40" stroke="#70d6ff" strokeDasharray="100 251" strokeDashoffset="-75" strokeWidth="12"></circle>
+                                <circle cx="50" cy="50" fill="transparent" r="40" stroke="#be95ff" strokeDasharray="50 251" strokeDashoffset="-175" strokeWidth="12"></circle>
+                            </svg>
+                            <div className="absolute flex flex-col items-center">
+                                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Total Spent</span>
+                                <span className="text-4xl font-[Outfit] font-black">$3,420</span>
+                            </div>
+                        </div>
+                        <div className="space-y-4">
+                            {['Entertainment', 'Food & Drinks', 'Shopping'].map((label, i) => (
+                                <div key={label} className="flex items-center gap-4 p-4 rounded-3xl hover:bg-white/50 transition-colors cursor-pointer">
+                                    <div className={`w-4 h-4 rounded-full bg-candy-${i === 0 ? 'pink' : i === 1 ? 'blue' : 'purple'}`}></div>
+                                    <p className="font-bold text-[#2d2d4a]">{label}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="col-span-12 lg:col-span-4 glass-candy p-8 bg-gradient-to-br from-candy-blue/20 to-candy-purple/20">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-candy-blue shadow-sm">
+                                <span className="material-symbols-outlined">lightbulb</span>
+                            </div>
+                            <h3 className="font-black text-xl">Smart Tip</h3>
+                        </div>
+                        <p className="text-[#4a4a6a] leading-relaxed mb-6 font-medium">
+                            Hey Sunny! You've spent <span className="text-candy-pink font-black">$45</span> on coffee this week. If you switch to home brewing for 3 days, you could afford that <span className="font-bold text-candy-purple">concert ticket</span> by Friday!
+                        </p>
+                        <button className="w-full py-4 bg-white/80 hover:bg-white rounded-2xl font-bold text-candy-blue transition-all border border-white">
+                            Set Brew Goal
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const SettingsPage = () => {
+            const [darkMode, setDarkMode] = useState(false);
+            return (
+                <div className="space-y-12">
+                    <header className="flex justify-between items-center">
+                        <div>
+                            <h2 className="text-candy-pink font-bold text-sm uppercase tracking-widest mb-1">Account & Preferences</h2>
+                            <h1 className="text-5xl font-[Outfit] font-black text-[#2d2d4a]">Profile & Settings</h1>
+                        </div>
+                        <Link to="/signup" className="px-8 py-4 bg-[#ff6b6b] text-white rounded-full font-bold shadow-lg hover:scale-105 transition-all flex items-center gap-2">
+                            <span className="material-symbols-outlined">logout</span>
+                            Logout
+                        </Link>
+                    </header>
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                        <div className="lg:col-span-4 space-y-8">
+                            <div className="glass-candy rounded-[2.5rem] p-10 flex flex-col items-center text-center">
+                                <div className="w-40 h-40 rounded-full p-1 bg-gradient-to-tr from-candy-pink to-candy-blue shadow-2xl mb-6">
+                                    <img alt="Profile" className="w-full h-full object-cover rounded-full border-8 border-white" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCF4-zzPw4IPBDyKGvJ-MhwsQ0y2phjb0zhyD79GB0RuBm1LeqgPg62SYXsLg-zENbstnMfJ_NZdoKGuoerhTO7sSGlvX7TTIPIObb2DMH-JF4EauIybe3zKqDeTmw8wBgfbRhTKkYrXueNf_NRMr6Wbxp0X0Nf31c251GF6SCaWmaZNBYcbW2VS99XoI3FEeZzXKf-qXfwWCJ4H9Q3YUqxNwMNXLzO6TcCclVo1PJtxCdSQkykrbZS_SolzEXcEbtyNGv-1HoKb6k6" />
+                                </div>
+                                <h3 className="text-2xl font-[Outfit] font-bold text-[#2d2d4a]">Sunny Sparkles</h3>
+                                <p className="text-gray-400 font-medium mb-6">sunny.treats@example.com</p>
+                            </div>
+                        </div>
+                        <div className="lg:col-span-8 flex flex-col gap-8">
+                            <div className={`glass-candy rounded-[2.5rem] p-8 ${darkMode ? 'dark-mode-on' : ''}`}>
+                                <h3 className="text-xl font-bold text-[#2d2d4a] mb-4">Experience Theme</h3>
+                                <div className="flex items-center gap-6">
+                                    <span className="material-symbols-outlined text-gray-400">light_mode</span>
+                                    <div className="toggle-switch" onClick={() => setDarkMode(!darkMode)}></div>
+                                    <span className="material-symbols-outlined text-[#2d2d4a]">dark_mode</span>
+                                    <span className="font-bold text-[#4a4a6a] ml-4">{darkMode ? 'Dark Mode Active' : 'Light Mode Active'}</span>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {['Privacy', 'Linked Accounts', 'Integrations', 'Support'].map(item => (
+                                    <div key={item} className="glass-candy rounded-[2.5rem] p-8 cursor-pointer hover:translate-y-[-5px] transition-all">
+                                        <h4 className="font-bold text-[#2d2d4a]">{item}</h4>
+                                        <p className="text-sm text-gray-400 mt-2">Configure your preferences and security settings for {item}.</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const SignUpPage = () => {
+            const navigate = useNavigate();
+            return (
+                <div className="min-h-screen mesh-container flex items-center justify-center p-6">
+                    <div className="w-full max-w-6xl bg-white/40 backdrop-blur-md rounded-[3rem] shadow-2xl overflow-hidden border-8 border-white flex">
+                        <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-candy-pink/20 to-candy-blue/20 items-center justify-center">
+                            <div className="text-center space-y-8">
+                                <span className="material-symbols-outlined text-[15rem] text-candy-pink drop-shadow-2xl floating-3d">savings</span>
+                                <h2 className="text-4xl font-[Outfit] font-black text-[#2d2d4a]">Save Sweetly.</h2>
+                            </div>
+                        </div>
+                        <div className="w-full lg:w-1/2 bg-white p-12 lg:p-20">
+                            <div className="mb-10">
+                                <div className="w-12 h-12 bg-gradient-to-br from-candy-pink to-candy-purple rounded-2xl flex items-center justify-center shadow-lg text-white mb-6">
+                                    <span className="material-symbols-outlined">icecream</span>
+                                </div>
+                                <h1 className="text-4xl font-[Outfit] font-black text-[#2d2d4a] mb-2">Welcome!</h1>
+                                <p className="text-gray-400 font-medium">Join thousands of students saving their coins.</p>
+                            </div>
+                            <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); navigate('/'); }}>
+                                <input className="w-full px-6 py-4 rounded-2xl bg-gray-50 border-2 border-transparent focus:border-candy-pink focus:outline-none" placeholder="Email Address" type="email" required />
+                                <input className="w-full px-6 py-4 rounded-2xl bg-gray-50 border-2 border-transparent focus:border-candy-pink focus:outline-none" placeholder="Password" type="password" required />
+                                <button type="submit" className="w-full py-5 bg-gradient-to-r from-candy-pink to-candy-purple text-white rounded-2xl font-black text-lg shadow-xl hover:scale-[1.02] transition-all">
+                                    Start Your Stash
+                                </button>
+                                <p className="text-center text-gray-500 font-medium mt-4">
+                                    Already a stasher? <span className="text-candy-purple font-bold cursor-pointer" onClick={() => navigate('/')}>Log in here</span>
+                                </p>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const LandingPage = () => {
+            const navigate = useNavigate();
+            return (
+                <div className="mesh-container min-h-screen">
+                    <nav className="px-12 py-8 flex items-center justify-between max-w-7xl mx-auto">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gradient-to-br from-candy-pink to-candy-purple rounded-xl flex items-center justify-center shadow-lg">
+                                <span className="material-symbols-outlined text-white">account_balance_wallet</span>
+                            </div>
+                            <span className="text-2xl font-[Outfit] font-black text-[#2d2d4a]">SpendWise</span>
+                        </div>
+                        <div className="flex gap-8 items-center">
+                            <Link to="/" className="font-bold text-[#4a4a6a]">Enter App</Link>
+                            <Link to="/signup" className="px-6 py-2 bg-candy-pink text-white rounded-full font-bold">Join Now</Link>
+                        </div>
+                    </nav>
+                    <main className="max-w-7xl mx-auto px-12 pt-20 flex flex-col lg:flex-row items-center gap-20">
+                        <div className="lg:w-1/2 space-y-8">
+                            <h1 className="text-7xl font-[Outfit] font-black text-[#2d2d4a] leading-none">
+                                Manage your <br />
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-candy-pink to-candy-purple">Financial World</span>
+                            </h1>
+                            <p className="text-xl text-[#4a4a6a] max-w-md font-medium">
+                                The most playful way to track your sugar stash and daily treats. Safe, sweet, and simple.
+                            </p>
+                            <button onClick={() => navigate('/signup')} className="px-10 py-5 bg-candy-pink text-white rounded-3xl font-black text-xl shadow-2xl hover:scale-105 transition-all">
+                                Get Started Free
+                            </button>
+                        </div>
+                        <div className="lg:w-1/2">
+                            <div className="iridescent-border shadow-2xl">
+                                <div className="glass-candy h-[340px] w-[540px] p-10 flex flex-col justify-between rounded-[2.3rem]">
+                                    <div className="flex justify-between items-start">
+                                        <div className="w-16 h-11 bg-yellow-400/80 rounded-lg shadow-sm"></div>
+                                        <span className="material-symbols-outlined text-candy-pink text-4xl">contactless</span>
+                                    </div>
+                                    <div>
+                                        <p className="text-gray-400 text-xs font-black tracking-widest uppercase mb-2">Active Dashboard</p>
+                                        <p className="text-[#2d2d4a] text-3xl font-[Outfit] font-bold">SUNNY SPENDER</p>
+                                    </div>
+                                    <div className="flex justify-between items-end border-t border-gray-100 pt-6">
+                                        <div className="space-y-1">
+                                            <p className="text-gray-400 text-xs font-black tracking-widest uppercase">Total Balance</p>
+                                            <p className="text-[#2d2d4a] text-5xl font-[Outfit] font-black">$12,450.00</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            );
+        };
+
+        // --- App Component ---
+
+        const App = () => {
+            return (
+                <MemoryRouter>
+                    <Routes>
+                        <Route path="/landing" element={<LandingPage />} />
+                        <Route path="/signup" element={<SignUpPage />} />
+                        <Route path="/" element={<Layout><HomePage /></Layout>} />
+                        <Route path="/history" element={<Layout><TransactionHistory /></Layout>} />
+                        <Route path="/analytics" element={<Layout><AnalyticsPage /></Layout>} />
+                        <Route path="/settings" element={<Layout><SettingsPage /></Layout>} />
+                    </Routes>
+                </MemoryRouter>
+            );
+        };
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+
+</html>
